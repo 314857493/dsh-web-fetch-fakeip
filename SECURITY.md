@@ -18,11 +18,10 @@ network failures, TLS failures, or timeouts. Proxy errors do not retry directly.
 
 ## Dependencies
 
-The plugin uses Undici >=8.12.2 for its own proxy transport. Compatibility is
+The separate dsh-scoped-http-proxy service owns the Undici proxy transport. Compatibility is
 currently pinned to DSH web component peers at 0.2.1-rc.4. Those host packages
 have their own dependencies: the initial npm audit reported advisories in
-older host-owned Undici and Zod versions. Updating this plugin's direct
-transport does not patch the host's dependency tree. The repository does not
+older host-owned Undici and Zod versions. Updating that service does not patch the host's dependency tree. The repository does not
 apply overrides to a user's DSH installation. Review `npm audit` and upgrade
 host components when a compatible upstream release is available.
 

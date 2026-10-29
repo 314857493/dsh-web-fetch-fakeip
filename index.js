@@ -6,14 +6,12 @@ import {
 } from "@deepseek-ai/dsh-web-fetch-http";
 import { WebError } from "@deepseek-ai/dsh-web";
 import { timeoutOf } from "@deepseek-ai/dsh-timeout";
-import { ProxyAgent, fetch } from "undici";
 import ipaddr from "ipaddr.js";
 import z from "@deepseek-ai/schemastery";
 
 export const name = "web-fetch-fakeip";
-export const inject = ["web"];
+export const inject = ["web", "scopedHttpProxy"];
 export const Config = z.object({
-  proxyUrl: z.string().default("http://127.0.0.1:7897"),
   maxResponseBytes: z.number().default(5000000),
   maxBodyChars: z.number().default(100000),
   timeoutMs: z.number().default(30000),
@@ -60,17 +58,8 @@ async function lookupWithSignal(hostname, signal) {
 }
 
 export class FakeIpFetchProvider extends HttpFetchProvider {
-  constructor(config = {}) {
+  constructor(config = {}, proxyTransport) {
     const resolved = Config(config);
-    const proxy = new URL(resolved.proxyUrl);
-    if (
-      !["http:", "https:"].includes(proxy.protocol) ||
-      proxy.username ||
-      proxy.password
-    )
-      throw new Error(
-        "Use an http:// or https:// proxy URL without embedded credentials",
-      );
     for (const key of ["maxResponseBytes", "maxBodyChars", "timeoutMs"]) {
       if (!Number.isSafeInteger(resolved[key]) || resolved[key] <= 0)
         throw new Error(`${key} must be a positive safe integer`);
@@ -83,8 +72,7 @@ export class FakeIpFetchProvider extends HttpFetchProvider {
     )
       throw new Error("maxRedirects must be a non-negative integer");
     super(resolved);
-    this.proxyUrl = proxy.href;
-    this.dispatcher = undefined;
+    this.proxyTransport = proxyTransport;
   }
 
   async requestOnce(url, signal) {
@@ -133,14 +121,16 @@ export class FakeIpFetchProvider extends HttpFetchProvider {
   }
 
   async requestProxy(url, signal) {
-    // Construct a private agent only when Fake-IP is actually detected.
-    this.dispatcher ??= new ProxyAgent(this.proxyUrl);
+    if (!this.proxyTransport)
+      throw new WebError(
+        "Install dsh-scoped-http-proxy to provide the scopedHttpProxy service",
+        "WEB_PROVIDER_CONFIGURED_MISSING",
+      );
     try {
-      const response = await fetch(url, {
+      const response = await this.proxyTransport.fetch(url, {
         method: "GET",
         redirect: "manual",
         signal,
-        dispatcher: this.dispatcher,
         headers: {
           "user-agent": this.limits.userAgent,
           accept:
@@ -157,14 +147,9 @@ export class FakeIpFetchProvider extends HttpFetchProvider {
       );
     }
   }
-
-  async dispose() {
-    await this.dispatcher?.destroy();
-  }
 }
 
 export function apply(ctx, config) {
-  const provider = new FakeIpFetchProvider(config);
-  ctx.effect(() => () => provider.dispose());
+  const provider = new FakeIpFetchProvider(config, ctx.scopedHttpProxy);
   ctx.web.registerFetchProvider(provider);
 }

@@ -1,6 +1,6 @@
 {
   "name": "dsh-web-fetch-fakeip",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Conditional Fake-IP proxy fallback for DeepSeek Harness web_fetch, without global network changes",
   "type": "module",
   "main": "index.js",
@@ -53,12 +53,15 @@
   },
   "dependencies": {
     "@deepseek-ai/schemastery": "~3.18.5",
-    "ipaddr.js": "^2.5.0",
-    "undici": "^8.12.2"
+    "ipaddr.js": "^2.5.0"
   },
   "peerDependencies": {
     "@deepseek-ai/dsh-web-fetch-http": "0.2.1-rc.4",
     "@deepseek-ai/dsh-web": "0.2.1-rc.4",
     "@deepseek-ai/dsh-timeout": "0.2.1-rc.4"
+  },
+  "devDependencies": {
+    "undici": "^8.12.2",
+    "dsh-scoped-http-proxy": "git+https://github.com/314857493/dsh-scoped-http-proxy.git#v0.1.0"
   }
 }

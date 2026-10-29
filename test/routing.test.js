@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { FakeIpFetchProvider } from "../index.js";
+import { ScopedHttpProxy } from "dsh-scoped-http-proxy/transport";
 test("local targets, URL credentials and non-HTTP schemes remain blocked", async () => {
   const p = new FakeIpFetchProvider();
-  try {
+  {
     for (const url of [
       "http://127.0.0.1",
       "http://192.168.1.1",
@@ -17,28 +18,22 @@ test("local targets, URL credentials and non-HTTP schemes remain blocked", async
     ]) {
       await assert.rejects(p.fetch({ url }));
     }
-  } finally {
-    await p.dispose();
   }
 });
 
 test("cancelled request is not sent", async () => {
   const p = new FakeIpFetchProvider();
-  try {
+  {
     await assert.rejects(
       p.fetch({ url: "https://example.com" }, AbortSignal.abort()),
       { code: "WEB_ABORTED" },
     );
-  } finally {
-    await p.dispose();
   }
 });
 
 test("proxy outage fails without falling back to direct access", async () => {
-  const p = new FakeIpFetchProvider({
-    proxyUrl: "http://127.0.0.1:1",
-    timeoutMs: 2000,
-  });
+  const proxy = new ScopedHttpProxy(() => "http://127.0.0.1:1");
+  const p = new FakeIpFetchProvider({ timeoutMs: 2000 }, proxy);
   p.requestDirect = async () => {
     throw blocked();
   };
@@ -48,7 +43,7 @@ test("proxy outage fails without falling back to direct access", async () => {
       code: "WEB_PROVIDER_ERROR",
     });
   } finally {
-    await p.dispose();
+    await proxy.dispose();
   }
 });
 
@@ -69,7 +64,6 @@ test("public DNS success keeps stock transport and never resolves again or alloc
     await p.requestOnce(url, new AbortController().signal),
     expected,
   );
-  assert.equal(p.dispatcher, undefined);
 });
 
 test("only a fully Fake-IP DNS answer set triggers proxy after stock rejection", async () => {

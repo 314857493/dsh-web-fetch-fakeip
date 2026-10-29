@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+- Extract transport and live proxy settings into dsh-scoped-http-proxy.
+- Require the scopedHttpProxy service; keep Fake-IP routing in this adapter.
+- Move proxyUrl configuration to the scoped-http-proxy component. Install both bundles.
+
 ## 0.3.0
 
 Initial public release under the name `dsh-web-fetch-fakeip`.

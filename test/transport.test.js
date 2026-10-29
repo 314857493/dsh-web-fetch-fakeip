@@ -5,6 +5,7 @@ import net from "node:net";
 import { once } from "node:events";
 import { getGlobalDispatcher } from "undici";
 import { FakeIpFetchProvider } from "../index.js";
+import { ScopedHttpProxy } from "dsh-scoped-http-proxy/transport";
 
 // A real HTTP proxy maps the public-looking test hostname to a local
 // origin. No internet, external proxy, API credentials, or fake system DNS needed.
@@ -64,10 +65,10 @@ async function fixture(t, config = {}) {
       upstream.pipe(client).pipe(upstream);
     });
   });
-  const provider = new FakeIpFetchProvider({
-    proxyUrl: `http://127.0.0.1:${proxy.address().port}`,
-    ...config,
-  });
+  const transport = new ScopedHttpProxy(
+    () => `http://127.0.0.1:${proxy.address().port}`,
+  );
+  const provider = new FakeIpFetchProvider(config, transport);
   provider.requestDirect = async () => {
     throw Object.assign(new Error("Fake-IP rejected by host"), {
       code: "WEB_BLOCKED_URL",
@@ -77,7 +78,7 @@ async function fixture(t, config = {}) {
     { address: "198.18.0.183", family: 4 },
   ];
   t.after(async () => {
-    await provider.dispose();
+    await transport.dispose();
     for (const socket of sockets) socket.destroy();
     await Promise.all(
       [origin, proxy].map(
@@ -85,14 +86,14 @@ async function fixture(t, config = {}) {
       ),
     );
   });
-  return { provider, connections };
+  return { provider, connections, transport };
 }
 
 test("real HTTP proxy fetch leaves process environment and global transport untouched", async (t) => {
   const env = { ...process.env };
   const dispatcher = getGlobalDispatcher();
   const fetch = globalThis.fetch;
-  const { provider, connections } = await fixture(t);
+  const { provider, connections, transport } = await fixture(t);
   const result = await provider.fetch({ url: "http://example.test/text" });
   assert.equal(result.statusCode, 200);
   assert.equal(result.body.content, "Hello proxy");
@@ -100,7 +101,7 @@ test("real HTTP proxy fetch leaves process environment and global transport unto
   assert.deepEqual({ ...process.env }, env);
   assert.equal(getGlobalDispatcher(), dispatcher);
   assert.equal(globalThis.fetch, fetch);
-  await provider.dispose();
+  await transport.dispose();
   assert.equal(getGlobalDispatcher(), dispatcher);
   assert.deepEqual({ ...process.env }, env);
 });
@@ -113,7 +114,7 @@ test("host still handles same-origin redirects", async (t) => {
 });
 
 test("host blocks redirects to another origin before sending a request", async (t) => {
-  const { provider, connections } = await fixture(t);
+  const { provider, connections, transport } = await fixture(t);
   await assert.rejects(
     provider.fetch({ url: "http://example.test/cross-origin" }),
     { code: "WEB_REDIRECT_BLOCKED" },

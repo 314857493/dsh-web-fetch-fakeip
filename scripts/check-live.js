@@ -1,8 +1,10 @@
 import { FakeIpFetchProvider } from "../index.js";
+import { ScopedHttpProxy } from "dsh-scoped-http-proxy/transport";
 
 const [url = "https://example.com", proxyUrl = "http://127.0.0.1:7897"] =
   process.argv.slice(2);
-const provider = new FakeIpFetchProvider({ proxyUrl });
+const transport = new ScopedHttpProxy(() => proxyUrl);
+const provider = new FakeIpFetchProvider({}, transport);
 let fallbacks = 0;
 const requestProxy = provider.requestProxy.bind(provider);
 provider.requestProxy = (...args) => {
@@ -24,5 +26,5 @@ try {
   );
   if (result.statusCode < 200 || result.statusCode >= 300) process.exitCode = 1;
 } finally {
-  await provider.dispose();
+  await transport.dispose();
 }

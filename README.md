@@ -8,7 +8,7 @@
 URL hostname "example.com" resolves to a non-public IP address
 ```
 
-默认保留 DSH 原有 HTTP 传输。只有原组件拒绝目标，且再次查询得到的 **全部 DNS 地址均属于 `198.18.0.0/16`** 时，才通过插件自己的 HTTP 代理连接重试。
+默认保留 DSH 原有 HTTP 传输。只有原组件拒绝目标，且再次查询得到的 **全部 DNS 地址均属于 `198.18.0.0/16`** 时，才调用独立的 `scopedHttpProxy` 服务重试。
 
 ## 为什么需要它
 
@@ -39,7 +39,8 @@ Clash 可以把公网域名映射到 Fake-IP。DSH 的公网地址校验会把�
 通过 DSH 官方插件管理命令，从本仓库的发布标签安装：
 
 ```sh
-dsh plugin --profile web add 'git+https://github.com/314857493/dsh-web-fetch-fakeip.git#v0.3.0'
+dsh plugin --profile web add 'git+https://github.com/314857493/dsh-scoped-http-proxy.git#v0.1.0'
+dsh plugin --profile web add 'git+https://github.com/314857493/dsh-web-fetch-fakeip.git#v0.4.0'
 ```
 
 macOS DSH Desktop 未提供 `dsh` 命令时，可使用应用自带入口：
@@ -49,7 +50,8 @@ DSH_HOME="$HOME/.dsh-desktop" \
   "/Applications/DSH Desktop.app/Contents/Resources/node/node" \
   "/Applications/DSH Desktop.app/Contents/Resources/dsh/lib/bin.js" \
   plugin --profile web add \
-  'git+https://github.com/314857493/dsh-web-fetch-fakeip.git#v0.3.0'
+  'git+https://github.com/314857493/dsh-scoped-http-proxy.git#v0.1.0' \
+  'git+https://github.com/314857493/dsh-web-fetch-fakeip.git#v0.4.0'
 ```
 
 这里的 `DSH_HOME` 仅用于该安装命令定位数据目录，不会写入 shell 配置。如果你自定义了数据目录，请使用自己的路径。安装完成后完全退出并重新打开 DSH。
@@ -64,12 +66,16 @@ dsh plugin --profile web remove dsh-web-fetch-proxy
 
 ## 配置
 
+从 0.4.0 起，必须同时安装 [dsh-scoped-http-proxy](https://github.com/314857493/dsh-scoped-http-proxy)。本插件只处理 Fake-IP 检测和回退，不再创建代理连接。
+
+代理地址可在 **设置 → 插件 → 独立 HTTP 代理** 中保存，后续请求立即生效。升级时将旧 `web-fetch-fakeip.config.proxyUrl` 移到 `scoped-http-proxy.config.proxyUrl`。
+
 默认代理：`http://127.0.0.1:7897`。请按你的 HTTP 或 mixed 端口修改；不支持 SOCKS URL 或 URL 内嵌凭据。
 
 在对应 profile 的 `cordis.patch.yml` 中添加以下覆盖项。Desktop 默认位置为 `~/.dsh-desktop/profiles/web/cordis.patch.yml`：
 
 ```yaml
-- id: web-fetch-fakeip
+- id: scoped-http-proxy
   config:
     proxyUrl: http://127.0.0.1:7897
 ```
