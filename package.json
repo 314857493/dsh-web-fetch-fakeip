@@ -1,0 +1,64 @@
+{
+  "name": "dsh-web-fetch-fakeip",
+  "version": "0.3.0",
+  "description": "Conditional Fake-IP proxy fallback for DeepSeek Harness web_fetch, without global network changes",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "cordis.patch.yml",
+    "README.md",
+    "README.en.md",
+    "LICENSE",
+    "NOTICE",
+    "SECURITY.md",
+    "CHANGELOG.md",
+    "scripts/check-live.js"
+  ],
+  "license": "MIT",
+  "author": "314857493",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/314857493/dsh-web-fetch-fakeip.git"
+  },
+  "homepage": "https://github.com/314857493/dsh-web-fetch-fakeip#readme",
+  "bugs": {
+    "url": "https://github.com/314857493/dsh-web-fetch-fakeip/issues"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "fake-ip",
+    "clash",
+    "proxy"
+  ],
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "test": "node --test --test-timeout=10000 test/*.test.js",
+    "test:live": "node scripts/check-live.js",
+    "check": "node --check index.js && npm test"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "~3.18.5",
+    "ipaddr.js": "^2.5.0",
+    "undici": "^8.12.2"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-web-fetch-http": "0.2.1-rc.4",
+    "@deepseek-ai/dsh-web": "0.2.1-rc.4",
+    "@deepseek-ai/dsh-timeout": "0.2.1-rc.4"
+  }
+}

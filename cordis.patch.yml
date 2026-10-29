@@ -1,0 +1,8 @@
+# Keep the selected provider id (http), replacing only its implementation.
+- id: web-fetch-http
+  disabled: true
+- insert:
+    - id: web-fetch-fakeip
+      name: dsh-web-fetch-fakeip
+      config:
+        proxyUrl: http://127.0.0.1:7897

@@ -1,0 +1,6 @@
+This project integrates with DeepSeek Harness through its exported packages.
+DeepSeek Harness and its components retain their respective copyright and
+license notices. The host HTTP provider is imported, not vendored here.
+
+This is an independent community plugin and is not an official DeepSeek or
+Clash project.
