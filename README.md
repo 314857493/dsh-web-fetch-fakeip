@@ -39,7 +39,7 @@ Clash 可以把公网域名映射到 Fake-IP。DSH 的公网地址校验会把�
 通过 DSH 官方插件管理命令，从本仓库的发布标签安装：
 
 ```sh
-dsh plugin --profile web add 'git+https://github.com/314857493/dsh-scoped-http-proxy.git#v0.1.0'
+dsh plugin --profile web add 'git+https://github.com/314857493/dsh-scoped-http-proxy.git#v0.1.1'
 dsh plugin --profile web add 'git+https://github.com/314857493/dsh-web-fetch-fakeip.git#v0.4.0'
 ```
 
@@ -50,7 +50,7 @@ DSH_HOME="$HOME/.dsh-desktop" \
   "/Applications/DSH Desktop.app/Contents/Resources/node/node" \
   "/Applications/DSH Desktop.app/Contents/Resources/dsh/lib/bin.js" \
   plugin --profile web add \
-  'git+https://github.com/314857493/dsh-scoped-http-proxy.git#v0.1.0' \
+  'git+https://github.com/314857493/dsh-scoped-http-proxy.git#v0.1.1' \
   'git+https://github.com/314857493/dsh-web-fetch-fakeip.git#v0.4.0'
 ```
 
@@ -68,7 +68,7 @@ dsh plugin --profile web remove dsh-web-fetch-proxy
 
 从 0.4.0 起，必须同时安装 [dsh-scoped-http-proxy](https://github.com/314857493/dsh-scoped-http-proxy)。本插件只处理 Fake-IP 检测和回退，不再创建代理连接。
 
-代理地址可在 **设置 → 插件 → 独立 HTTP 代理** 中保存，后续请求立即生效。升级时将旧 `web-fetch-fakeip.config.proxyUrl` 移到 `scoped-http-proxy.config.proxyUrl`。
+代理地址可在 **侧边栏「插件」→ 独立 HTTP 代理** 中保存，后续请求立即生效。升级时将旧 `web-fetch-fakeip.config.proxyUrl` 移到 `scoped-http-proxy.config.proxyUrl`。
 
 默认代理：`http://127.0.0.1:7897`。请按你的 HTTP 或 mixed 端口修改；不支持 SOCKS URL 或 URL 内嵌凭据。
 

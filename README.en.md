@@ -13,7 +13,7 @@ This plugin preserves the stock HTTP transport. It calls the separate `scopedHtt
 Requires Node.js 22.19+ and DSH components `@deepseek-ai/dsh-web-fetch-http`, `@deepseek-ai/dsh-web`, and `@deepseek-ai/dsh-timeout` at `0.2.1-rc.4`. Other host versions have not been verified. The plugin extends the exported `HttpFetchProvider` but relies on its implementation-level `requestOnce` method.
 
 ```sh
-dsh plugin --profile web add 'git+https://github.com/314857493/dsh-scoped-http-proxy.git#v0.1.0'
+dsh plugin --profile web add 'git+https://github.com/314857493/dsh-scoped-http-proxy.git#v0.1.1'
 dsh plugin --profile web add 'git+https://github.com/314857493/dsh-web-fetch-fakeip.git#v0.4.0'
 ```
 
@@ -23,7 +23,7 @@ The project is distributed through GitHub, not npm. The Chinese README includes 
 
 ## Configure
 
-Since 0.4.0, install both packages. Configure the proxy in **Settings → Plugins → Scoped HTTP proxy**. New requests use the saved address immediately. Move any old `web-fetch-fakeip.config.proxyUrl` override to `scoped-http-proxy.config.proxyUrl`. This adapter owns only Fake-IP routing; the independent service owns transport.
+Since 0.4.0, install both packages. Configure the proxy in **Plugins → Scoped HTTP proxy**. New requests use the saved address immediately. Move any old `web-fetch-fakeip.config.proxyUrl` override to `scoped-http-proxy.config.proxyUrl`. This adapter owns only Fake-IP routing; the independent service owns transport.
 
 Default proxy: `http://127.0.0.1:7897`. Set your HTTP/mixed proxy port in the profile's `cordis.patch.yml`:
 

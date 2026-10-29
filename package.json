@@ -62,6 +62,6 @@
   },
   "devDependencies": {
     "undici": "^8.12.2",
-    "dsh-scoped-http-proxy": "git+https://github.com/314857493/dsh-scoped-http-proxy.git#v0.1.0"
+    "dsh-scoped-http-proxy": "git+https://github.com/314857493/dsh-scoped-http-proxy.git#v0.1.1"
   }
 }
